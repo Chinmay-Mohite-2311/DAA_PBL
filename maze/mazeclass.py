@@ -9,10 +9,10 @@ import numpy as np
 seed()
 
 # constants
-CELL_SIZE = 60
-GRID_WIDTH = 15
-GRID_HEIGHT = 15
-LINE_THICKNESS = 6
+CELL_SIZE = 30
+GRID_WIDTH = 30
+GRID_HEIGHT = 20
+LINE_THICKNESS = 2
 
 # location of cell marked as entrance
 ENTER_LOCATION = (0, 0)
@@ -27,7 +27,7 @@ DIRECTIONS = [(-1, 0), (1, 0), (0, -1), (0, 1)]
 height = int(GRID_HEIGHT * CELL_SIZE)
 width = int(GRID_WIDTH * CELL_SIZE)
 tk = Tk()
-canvas = Canvas(tk, width=width, height=height)
+canvas = Canvas(tk, width=width + 10, height=height + 10)
 canvas.pack()
 
 out = cv2.VideoWriter(
@@ -41,15 +41,15 @@ class Wall:
         self.second_cell = second_cell
 
         # weight of each edge, i.e. how likely this wall is to be selected from the list of active walls
-        # self.weight = 1
+        self.weight = 1
 
         # can switch to this line to demonstrate how changing weights changes overall shape of maze
-        self.weight = (
-            math.sqrt(first_cell[0] ** 2 + first_cell[1] ** 2) * first_cell[1] ** 20
-            + math.sqrt(first_cell[0] ** 2 + first_cell[1] ** 2) * first_cell[0] ** 20
-            + math.sqrt(first_cell[0] ** 2 + first_cell[1] ** 2) * second_cell[1] ** 20
-            + math.sqrt(first_cell[0] ** 2 + first_cell[1] ** 2) * second_cell[0] ** 20
-        )
+        # self.weight = (
+        #     math.sqrt(first_cell[0] ** 2 + first_cell[1] ** 2) * first_cell[1] ** 20
+        #     + math.sqrt(first_cell[0] ** 2 + first_cell[1] ** 2) * first_cell[0] ** 20
+        #     + math.sqrt(first_cell[0] ** 2 + first_cell[1] ** 2) * second_cell[1] ** 20
+        #     + math.sqrt(first_cell[0] ** 2 + first_cell[1] ** 2) * second_cell[0] ** 20
+        # )
 
         # orientation is 1 for horizontal, 0 for vertical wall
         self.orientation = abs(first_cell[0] - second_cell[0])
@@ -182,6 +182,7 @@ class Maze:
 
         # start in the top left corner
         first_cell = starting_cell
+
         # turn it into a Cell object to get its walls
         first_Cell = Cell(first_cell[0], first_cell[1])
 
@@ -331,6 +332,24 @@ class Maze:
 
     def draw_maze_solving(self, path, wait=0):
         self.canvas.create_rectangle(0, 0, width, height, fill="light blue")
+
+        # Draw starting cell (ENTER_LOCATION) in green
+        self.canvas.create_rectangle(
+            ENTER_LOCATION[1] * CELL_SIZE + LINE_THICKNESS / 2,
+            ENTER_LOCATION[0] * CELL_SIZE + LINE_THICKNESS / 2,
+            (ENTER_LOCATION[1] + 1) * CELL_SIZE - LINE_THICKNESS / 2,
+            (ENTER_LOCATION[0] + 1) * CELL_SIZE - LINE_THICKNESS / 2,
+            fill="green",
+        )
+
+        # Draw ending cell (bottom-right corner) in blue
+        self.canvas.create_rectangle(
+            (GRID_WIDTH - 1) * CELL_SIZE + LINE_THICKNESS / 2,
+            (GRID_HEIGHT - 1) * CELL_SIZE + LINE_THICKNESS / 2,
+            GRID_WIDTH * CELL_SIZE - LINE_THICKNESS / 2,
+            GRID_HEIGHT * CELL_SIZE - LINE_THICKNESS / 2,
+            fill="blue",
+        )
 
         for k in range(GRID_HEIGHT):
             self.canvas.create_rectangle(
